@@ -1,0 +1,54 @@
+---
+layout: runbook
+title: '#4471 split · three problems, not one'
+owner: Gustavo Graeff
+status: open
+reviewed: 2026-10-30
+signature: v1.eyJzdWIiOiIyMzQ3IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMzNzQ4NDcsImV4cCI6MTc5MzQ2MTI0N30.7JJQHJZM1PDWLgPvuZGS9yzfhvaR5aEc9Au0_S809q4
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const issues = {
+    parser: 'https://github.com/cprograms484/tickets-mock/issues/1',
+    hint: 'https://github.com/cprograms484/tickets-mock/issues/2',
+    move: 'https://github.com/cprograms484/tickets-mock/issues/3',
+  };
+</script>
+
+The [#4471 page](/kb/incidents/4471) calls every report one issue. The reports show three
+problems. Each one has its own ticket now.
+
+<Callout>
+Three problems, three fixes. The queued parser fix closes only the first one.
+</Callout>
+
+## The problems
+
+<ProblemTable ticket={4471} {issues} />
+
+- **parser.** The shared parser reads every date month first. Day first tenants see day and
+  month flip. "7 April went out on 4 July."
+- **hint.** The booking-v3 form prints `MM/DD/YYYY` under its date field. People type the month
+  first, as told. The form reads the day first. Only form reports from booking-v3 tenants.
+- **move.** The date moves by one day, not a flip. "Client in Lisbon got Tuesday. Client in
+  Toronto got Monday." This looks like a time zone bug. The desk listed these reports in
+  `desk-notes.json`.
+
+## How we counted
+
+1. The export repeats some reports, because its pages overlap. We count each report id once.
+2. We place a report by its tenant and the way it came in (`causes.ts`), not by its intake tag.
+   Intake guesses the tag from the browser language, so many tags point to the wrong problem.
+3. A report the desk read as a one-day move counts under `move`.
+
+## Why it was one ticket
+
+Triage merges reports by subject line ([decision 0001](/kb/decisions/0001-dedupe-by-subject)).
+All three problems arrive with the same few subject lines, and triage never reads the body.
+So they landed in one ticket.
+
+<RenderStamp {signature} />
